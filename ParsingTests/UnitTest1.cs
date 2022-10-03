@@ -1,3 +1,5 @@
+using PrattParsing;
+
 namespace ParsingTests
 {
     public class Tests
@@ -14,7 +16,7 @@ namespace ParsingTests
             var input = "5+5";
             var l = new PrattLexer(input);
 
-            IEnumerable<Tokens> lTokens = l.GetTokens();
+            IEnumerable<LexerToken> lTokens = l.GetTokens();
             Assert.IsTrue(true);
         }
     }

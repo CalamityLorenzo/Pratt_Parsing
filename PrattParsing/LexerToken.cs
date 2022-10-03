@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace PrattParsing
 {
-    internal record LexerToken (LexerTokenType type, string literal);
+    public record LexerToken (LexerTokenType type, string literal);
 }

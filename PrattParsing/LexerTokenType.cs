@@ -9,22 +9,22 @@
         ASTERISK,
         SLASH,
         BANG,
+        BANG_EQUALS,
         AMPERSAND,
         LEFT_PARENS,
         RIGHT_PARENS,
         LEFT_BRACE,
         RIGHT_BRACE,
+
         EQUALS,
-        BANG_EQUALS,
         ASSIGN,
-        
+
         QUESTION_MARK,
         COLON,
         SEMI_COLON,
         INT,
-        LITERAL
+        LITERAL,
 
-
-
+        EOF
     }
 }
