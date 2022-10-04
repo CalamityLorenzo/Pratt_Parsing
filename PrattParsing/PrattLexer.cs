@@ -6,6 +6,8 @@
         private int NextPosition;
         private readonly string rawInput;
 
+        private List<LexerToken> Tokens = new List<LexerToken>();
+
         public PrattLexer(string input)
         {
             this.currentPosition = 0;
@@ -22,68 +24,84 @@
 
         public IEnumerable<LexerToken> GetTokens()
         {
-            var tokens = new List<LexerToken>();
             while (this.currentPosition < rawInput.Length)
             {
-                tokens.Add(Read(rawInput[currentPosition]));
+                Read();
             }
 
-            return tokens;
+            return this.Tokens;
+
         }
 
-        private LexerToken Read(char curChar)
+        private void Read()
         {
+            var curChar = rawInput[currentPosition];
             switch (curChar)
             {
                 case '+':
                     if (this.Peek() == '+')
-                        return new LexerToken(LexerTokenType.PLUS_PLUS, "++");
+                        Tokens.Add(new LexerToken(LexerTokenType.PLUS_PLUS, "++"));
                     else
-                        return new LexerToken(LexerTokenType.PLUS, new String(new char[] { curChar }));
+                        Tokens.Add(new LexerToken(LexerTokenType.PLUS, new String(new char[] { curChar })));
                     break;
                 case '-':
                     if (this.Peek() == '-')
-                        return new LexerToken(LexerTokenType.MINUS_MINUS, "--");
+                        Tokens.Add(new LexerToken(LexerTokenType.MINUS_MINUS, "--"));
                     else
-                        return new LexerToken(LexerTokenType.MINUS, "-");
+                        Tokens.Add(new LexerToken(LexerTokenType.MINUS, "-"));
                     break;
                 case '=':
                     if (this.Peek() == '=')
-                        return new LexerToken(LexerTokenType.EQUALS, "==");
+                        Tokens.Add(new LexerToken(LexerTokenType.EQUALS, "=="));
                     else
-                        return new LexerToken(LexerTokenType.ASSIGN, "=");
+                        Tokens.Add(new LexerToken(LexerTokenType.ASSIGN, "="));
                     break;
                 case '!':
                     if (this.Peek() == '=')
-                        return new LexerToken(LexerTokenType.BANG_EQUALS, "!=");
+                        Tokens.Add(new LexerToken(LexerTokenType.BANG_EQUALS, "!="));
                     else
-                        return new LexerToken(LexerTokenType.BANG, "!");
+                        Tokens.Add(new LexerToken(LexerTokenType.BANG, "!"));
+                    break;
                 case '*':
-                    return new LexerToken(LexerTokenType.ASTERISK, "*");
+                    Tokens.Add(new LexerToken(LexerTokenType.ASTERISK, "*"));
+                    break;
                 case '/':
-                    return new LexerToken(LexerTokenType.SLASH, "/");
+                    Tokens.Add(new LexerToken(LexerTokenType.SLASH, "/"));
+                    break;
                 case '(':
-                    return new LexerToken(LexerTokenType.LEFT_PARENS, "(");
+                    Tokens.Add(new LexerToken(LexerTokenType.LEFT_PARENS, "("));
+                    break;
                 case ')':
-                    return new LexerToken(LexerTokenType.RIGHT_PARENS, ")");
+                    Tokens.Add(new LexerToken(LexerTokenType.RIGHT_PARENS, ")"));
+                    break;
                 case '{':
-                    return new LexerToken(LexerTokenType.LEFT_BRACE, "{");
+                    Tokens.Add(new LexerToken(LexerTokenType.LEFT_BRACE, "{"));
+                    break;
                 case '}':
-                    return new LexerToken(LexerTokenType.RIGHT_BRACE, "}");
+                    Tokens.Add(new LexerToken(LexerTokenType.RIGHT_BRACE, "}"));
+                    break;
                 case '?':
-                    return new LexerToken(LexerTokenType.QUESTION_MARK, "?");
+                    Tokens.Add(new LexerToken(LexerTokenType.QUESTION_MARK, "?"));
+                    break;
                 case ':':
-                    return new LexerToken(LexerTokenType.COLON, ":");
+                    Tokens.Add(new LexerToken(LexerTokenType.COLON, ":"));
+                    break;
                 case ';':
-                    return new LexerToken(LexerTokenType.SEMI_COLON, ":");
+                    Tokens.Add(new LexerToken(LexerTokenType.SEMI_COLON, ":"));
+                    break;
                 case '0':
-                    return new LexerToken(LexerTokenType.EOF, "");
-                
-
-
+                    Tokens.Add(new LexerToken(LexerTokenType.EOF, ""));
+                    break;
+                case ' ': // don't care about the whitespace
+                case '\r':
+                case '\n':
+                    break;
 
 
             }
+
+            this.MoveNextPosition());
+
         }
 
         private char Peek()
@@ -93,4 +111,16 @@
             else
                 return '0';
         }
+
+        private bool Match(char matchChar)
+        {
+            if (this.Peek() == matchChar)
+            {
+                this.MoveNextPosition();
+                return true;
+            }
+
+            return false;
+        }
     }
+}
