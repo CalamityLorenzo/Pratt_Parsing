@@ -11,6 +11,8 @@
         BANG,
         BANG_EQUALS,
         AMPERSAND,
+        MOD,
+
         LEFT_PARENS,
         RIGHT_PARENS,
         LEFT_BRACE,

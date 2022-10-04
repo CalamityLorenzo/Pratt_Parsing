@@ -1,4 +1,6 @@
-﻿namespace PrattParsing
+﻿using System.Transactions;
+
+namespace PrattParsing
 {
     public class PrattLexer
     {
@@ -18,7 +20,7 @@
         public void MoveNextPosition()
         {
             this.currentPosition = NextPosition;
-            if (NextPosition + 1 < rawInput.Length)
+            if (NextPosition < rawInput.Length)
                 NextPosition += 1;
         }
 
@@ -68,6 +70,9 @@
                 case '/':
                     Tokens.Add(new LexerToken(LexerTokenType.SLASH, "/"));
                     break;
+                case '%':
+                    Tokens.Add(new LexerToken(LexerTokenType.MOD, "%"));
+                    break;
                 case '(':
                     Tokens.Add(new LexerToken(LexerTokenType.LEFT_PARENS, "("));
                     break;
@@ -96,13 +101,52 @@
                 case '\r':
                 case '\n':
                     break;
+                default:
+                    if (char.IsDigit(curChar))
+                    {
+                        Tokens.Add(new LexerToken(LexerTokenType.INT, MapNumber()));
+                    }
+                    else if (char.IsLetter(curChar) || (curChar == '_' && char.IsLetterOrDigit(Peek())))
+                    {
+                        Tokens.Add(new LexerToken(LexerTokenType.LITERAL, MapLiteral()));
+                    }
+                    break;
 
 
             }
-
-            this.MoveNextPosition());
+            this.MoveNextPosition();
 
         }
+
+        // Processes the stream until we reach the end of a number
+        private string MapNumber()
+        {
+            var literal = "";
+            while (!AtInputEnd() && char.IsDigit(this.rawInput[currentPosition]))
+            {
+                literal += this.rawInput[currentPosition];
+                this.MoveNextPosition();
+            }
+            return literal;
+        }
+
+        private bool AtInputEnd() => currentPosition >= this.rawInput.Length;
+
+        private string MapLiteral()
+        {
+            var curChar = this.rawInput[currentPosition];
+            var literal = "";
+            while (IsLiteralChar(curChar))
+            {
+                this.MoveNextPosition();
+                literal += curChar;
+                curChar = this.rawInput[currentPosition];
+            }
+
+            return literal;
+        }
+
+        private bool IsLiteralChar(char c) => Char.IsLetterOrDigit(c) || c == '_';
 
         private char Peek()
         {
