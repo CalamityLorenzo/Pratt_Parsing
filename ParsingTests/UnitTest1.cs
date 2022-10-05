@@ -4,7 +4,7 @@ using static PrattParsing.LexerTokenType;
 
 namespace ParsingTests
 {
-    public class Tests
+    public class LexerTests
     {
         [SetUp]
         public void Setup()
@@ -21,7 +21,6 @@ namespace ParsingTests
             IEnumerable<LexerToken> lTokens = l.GetTokens();
             Assert.IsTrue(lTokens.Count() == 3);
         }
-
 
         [Test(Description = "Ignores the rubbish space")]
         public void IgnoreWhiteSpaceAndnewLines()
