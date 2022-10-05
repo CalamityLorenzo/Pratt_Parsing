@@ -1,4 +1,5 @@
 ﻿using System.Transactions;
+using static PrattParsing.LexerTokenType;
 
 namespace PrattParsing
 {
@@ -9,6 +10,8 @@ namespace PrattParsing
         private readonly string rawInput;
 
         private List<LexerToken> Tokens = new List<LexerToken>();
+
+        public int TokenStartIdx { get; private set; }
 
         public PrattLexer(string input)
         {
@@ -26,7 +29,7 @@ namespace PrattParsing
 
         public IEnumerable<LexerToken> GetTokens()
         {
-            while (this.currentPosition < rawInput.Length)
+            while (!AtInputEnd())
             {
                 Read();
             }
@@ -38,64 +41,66 @@ namespace PrattParsing
         private void Read()
         {
             var curChar = rawInput[currentPosition];
+            // Each time we loop this is reset.
+            this.TokenStartIdx = currentPosition;
             switch (curChar)
             {
                 case '+':
-                    if (this.Peek() == '+')
-                        Tokens.Add(new LexerToken(LexerTokenType.PLUS_PLUS, "++"));
+                    if (Match('+'))
+                        Tokens.Add(CreateToken(PLUS_PLUS));
                     else
-                        Tokens.Add(new LexerToken(LexerTokenType.PLUS, new String(new char[] { curChar })));
+                        Tokens.Add(CreateToken(LexerTokenType.PLUS));
                     break;
                 case '-':
-                    if (this.Peek() == '-')
-                        Tokens.Add(new LexerToken(LexerTokenType.MINUS_MINUS, "--"));
+                    if (Match('-'))
+                        Tokens.Add(CreateToken(MINUS_MINUS));
                     else
-                        Tokens.Add(new LexerToken(LexerTokenType.MINUS, "-"));
+                        Tokens.Add(CreateToken(MINUS));
                     break;
                 case '=':
-                    if (this.Peek() == '=')
-                        Tokens.Add(new LexerToken(LexerTokenType.EQUALS, "=="));
+                    if (Match('='))
+                        Tokens.Add(CreateToken(EQUALS));
                     else
-                        Tokens.Add(new LexerToken(LexerTokenType.ASSIGN, "="));
+                        Tokens.Add(CreateToken(ASSIGN));
                     break;
                 case '!':
-                    if (this.Peek() == '=')
-                        Tokens.Add(new LexerToken(LexerTokenType.BANG_EQUALS, "!="));
+                    if (Match('='))
+                        Tokens.Add(CreateToken(BANG_EQUALS));
                     else
-                        Tokens.Add(new LexerToken(LexerTokenType.BANG, "!"));
+                        Tokens.Add(CreateToken(BANG));
                     break;
                 case '*':
-                    Tokens.Add(new LexerToken(LexerTokenType.ASTERISK, "*"));
+                    Tokens.Add(CreateToken(ASTERISK));
                     break;
                 case '/':
-                    Tokens.Add(new LexerToken(LexerTokenType.SLASH, "/"));
+                    Tokens.Add(CreateToken(SLASH));
                     break;
                 case '%':
-                    Tokens.Add(new LexerToken(LexerTokenType.MOD, "%"));
+                    Tokens.Add(CreateToken(MOD));
                     break;
                 case '(':
-                    Tokens.Add(new LexerToken(LexerTokenType.LEFT_PARENS, "("));
+                    Tokens.Add(CreateToken(LEFT_PARENS));
                     break;
                 case ')':
-                    Tokens.Add(new LexerToken(LexerTokenType.RIGHT_PARENS, ")"));
+                    Tokens.Add(CreateToken(RIGHT_PARENS));
                     break;
                 case '{':
-                    Tokens.Add(new LexerToken(LexerTokenType.LEFT_BRACE, "{"));
+                    Tokens.Add(CreateToken(LEFT_BRACE));
                     break;
                 case '}':
-                    Tokens.Add(new LexerToken(LexerTokenType.RIGHT_BRACE, "}"));
+                    Tokens.Add(CreateToken(RIGHT_BRACE));
                     break;
                 case '?':
-                    Tokens.Add(new LexerToken(LexerTokenType.QUESTION_MARK, "?"));
+                    Tokens.Add(CreateToken(QUESTION_MARK));
                     break;
                 case ':':
-                    Tokens.Add(new LexerToken(LexerTokenType.COLON, ":"));
+                    Tokens.Add(CreateToken(COLON));
                     break;
                 case ';':
-                    Tokens.Add(new LexerToken(LexerTokenType.SEMI_COLON, ":"));
+                    Tokens.Add(CreateToken(SEMI_COLON));
                     break;
-                case '0':
-                    Tokens.Add(new LexerToken(LexerTokenType.EOF, ""));
+                case '\0':
+                    Tokens.Add(CreateToken(EOF));
                     break;
                 case ' ': // don't care about the whitespace
                 case '\r':
@@ -104,11 +109,13 @@ namespace PrattParsing
                 default:
                     if (char.IsDigit(curChar))
                     {
-                        Tokens.Add(new LexerToken(LexerTokenType.INT, MapNumber()));
+                        MapNumber();
+                        Tokens.Add(CreateToken(INT));
                     }
                     else if (char.IsLetter(curChar) || (curChar == '_' && char.IsLetterOrDigit(Peek())))
                     {
-                        Tokens.Add(new LexerToken(LexerTokenType.LITERAL, MapLiteral()));
+                        MapLiteral();
+                        Tokens.Add(CreateToken(LITERAL));
                     }
                     break;
 
@@ -118,46 +125,54 @@ namespace PrattParsing
 
         }
 
-        // Processes the stream until we reach the end of a number
-        private string MapNumber()
+        private LexerToken CreateToken(LexerTokenType type)
         {
-            var literal = "";
-            while (!AtInputEnd() && char.IsDigit(this.rawInput[currentPosition]))
+            var rangeEnd = (currentPosition - TokenStartIdx) + 1;
+            return new LexerToken(type, rawInput[TokenStartIdx..(TokenStartIdx + rangeEnd)]);
+        }
+
+        /// <summary>
+        /// Processes the stream until we reach the end of a number
+        /// TODO: the while loop is clumsy, as is the constant string allocation.
+        /// Need a FinishIdx-StartIdx mechanism so we only allocate once.
+        /// </summary>
+        /// <returns></returns>
+        private void MapNumber()
+        {
+            //var literal = new String(new char[] { this.rawInput[currentPosition] });
+            while (!AtInputEnd() && char.IsDigit(this.Peek()))
             {
-                literal += this.rawInput[currentPosition];
-                this.MoveNextPosition();
+                MoveNextPosition();
             }
-            return literal;
         }
 
         private bool AtInputEnd() => currentPosition >= this.rawInput.Length;
 
-        private string MapLiteral()
+        private void MapLiteral()
         {
-            var curChar = this.rawInput[currentPosition];
-            var literal = "";
-            while (IsLiteralChar(curChar))
+            // We already are in the literal at thisPoint
+            // so we are just determining the length
+            while (!AtInputEnd() && IsLiteralChar(this.Peek()))
             {
                 this.MoveNextPosition();
-                literal += curChar;
-                curChar = this.rawInput[currentPosition];
             }
 
-            return literal;
         }
 
         private bool IsLiteralChar(char c) => Char.IsLetterOrDigit(c) || c == '_';
 
         private char Peek()
         {
-            if (NextPosition < rawInput.Length - 1)
+            if (!AtInputEnd())
                 return rawInput[NextPosition];
             else
-                return '0';
+                return '\0';
         }
 
         private bool Match(char matchChar)
         {
+            if (AtInputEnd()) return false;
+
             if (this.Peek() == matchChar)
             {
                 this.MoveNextPosition();
