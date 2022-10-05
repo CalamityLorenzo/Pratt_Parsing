@@ -1,5 +1,6 @@
 using PrattParsing;
 using System.Reflection;
+using static PrattParsing.LexerTokenType;
 
 namespace ParsingTests
 {
@@ -43,7 +44,7 @@ namespace ParsingTests
             var result = new List<LexerToken> {
                 new (LexerTokenType.INT, "5"),
                 new (LexerTokenType.MOD, "%"),
-                new (LexerTokenType.INT, "5"),
+                new (INT, "5"),
                 new (LexerTokenType.ASSIGN, "="),
                 new (LexerTokenType.LEFT_PARENS, "("),
                 new (LexerTokenType.INT, "10"),
@@ -79,6 +80,24 @@ namespace ParsingTests
 
             Assert.True(lt.SequenceEqual(result));
 
+        }
+
+        [Test(Description = "CAn we handle zeros?")]
+        public void HandleZeroAndEmptyChar()
+        {
+            var input = "0=0\0);";
+
+            var l = new PrattLexer(input);
+            var lt = l.GetTokens().ToList();
+            var result = new List<LexerToken> {
+                new(INT, "0"),
+                new(ASSIGN, "="),
+                new(INT, "0"),
+                new(EOF, "\0"),
+                new(RIGHT_PARENS, ")"),
+                new(SEMI_COLON, ";")
+            };
+            Assert.True(lt.SequenceEqual(result));
         }
     }
 }
