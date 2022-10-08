@@ -20,13 +20,15 @@
 
         EQUALS,
         ASSIGN,
+        TILDE,
+        CARET,
 
         QUESTION_MARK,
         COLON,
         SEMI_COLON,
         INT,
         LITERAL,
-
+        COMMENT,
         EOF
     }
 }

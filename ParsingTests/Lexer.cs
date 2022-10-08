@@ -98,5 +98,21 @@ namespace ParsingTests
             };
             Assert.True(lt.SequenceEqual(result));
         }
+
+        [Test(Description = "Comments questions?")]
+        public void HaveACommentOrTwo()
+        {
+            var input = "// a\r This is Different";
+
+            var l = new PrattLexer(input);
+            var lt = l.GetTokens().ToList();
+            var result = new List<LexerToken> {
+                new(COMMENT, "// a"),
+                new(LITERAL, "This"),
+                new(LITERAL, "is"),
+                new(LITERAL, "Different"),
+            };
+            Assert.True(lt.SequenceEqual(result));
+        }
     }
 }

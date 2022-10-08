@@ -22,9 +22,11 @@ namespace PrattParsing
 
         public void MoveNextPosition()
         {
-            this.currentPosition = NextPosition;
-            if (NextPosition < rawInput.Length)
+            if (NextPosition <= rawInput.Length)
+            {
+                this.currentPosition = NextPosition;
                 NextPosition += 1;
+            }
         }
 
         public IEnumerable<LexerToken> GetTokens()
@@ -33,9 +35,7 @@ namespace PrattParsing
             {
                 Read();
             }
-
             return this.Tokens;
-
         }
 
         private void Read()
@@ -73,10 +73,22 @@ namespace PrattParsing
                     Tokens.Add(CreateToken(ASTERISK));
                     break;
                 case '/':
-                    Tokens.Add(CreateToken(SLASH));
+                    if (Match('/'))
+                    {
+                        MapComment();
+                        Tokens.Add(CreateToken(COMMENT));
+                    }
+                    else
+                        Tokens.Add(CreateToken(SLASH));
                     break;
                 case '%':
                     Tokens.Add(CreateToken(MOD));
+                    break;
+                case '~':
+                    Tokens.Add(CreateToken(TILDE));
+                    break;
+                case '^':
+                    Tokens.Add(CreateToken(CARET)); 
                     break;
                 case '(':
                     Tokens.Add(CreateToken(LEFT_PARENS));
@@ -125,10 +137,25 @@ namespace PrattParsing
 
         }
 
+        /// <summary>
+        /// Comments are like this. except with two slashes. They are terminated by an eof.
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        private void MapComment()
+        {
+            // Keep on the trucking!
+            var p = Peek();
+            while (!AtInputEnd() && (p != '\0' && p != '\r' && p != '\n'))
+            {
+                MoveNextPosition();
+                p = Peek();
+            }
+        }
+
         private LexerToken CreateToken(LexerTokenType type)
         {
-            var rangeEnd = (currentPosition - TokenStartIdx) + 1;
-            return new LexerToken(type, rawInput[TokenStartIdx..(TokenStartIdx + rangeEnd)]);
+            var rangeLength = (currentPosition - TokenStartIdx) + (!AtInputEnd() ? 1 : 0);
+            return new LexerToken(type, rawInput[TokenStartIdx..(TokenStartIdx + rangeLength)]);
         }
 
         /// <summary>
@@ -152,7 +179,7 @@ namespace PrattParsing
         {
             // We already are in the literal at thisPoint
             // so we are just determining the length
-            while (!AtInputEnd() && IsLiteralChar(this.Peek()))
+            while (!AtInputEnd() && (IsLiteralChar(this.Peek()) && this.Peek() != '\0'))
             {
                 this.MoveNextPosition();
             }
@@ -163,10 +190,10 @@ namespace PrattParsing
 
         private char Peek()
         {
-            if (!AtInputEnd())
-                return rawInput[NextPosition];
-            else
+            if (NextPosition >= rawInput.Length)
                 return '\0';
+            else
+                return rawInput[NextPosition];
         }
 
         private bool Match(char matchChar)
