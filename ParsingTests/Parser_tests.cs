@@ -21,5 +21,16 @@ namespace ParsingTests
             var result = p.Parse();
             Assert.IsTrue(result.Count>-1);
         }
+
+        [Test(Description = "Just seeing what happens!.")]
+        public void ParseThis()
+        {
+            var input = "5+5";
+            var l = new PrattLexer(input);
+
+            PrattParser p = new(l);
+            var result = p.Parse();
+            Assert.IsTrue(result.Count > -1);
+        }
     }
 }

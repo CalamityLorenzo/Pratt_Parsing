@@ -40,13 +40,18 @@ namespace PrattParsing.Parser
         {
             LexerToken token = this.Consume();
 
-            var prefix = this._prefixParselets[token.type];
-            return prefix.Parse(this, token);
+            if (token.type == INT)
+                return new NumberExpression(token.literal, int.Parse(token.literal));
+            else
+            {
+                var prefix = this._prefixParselets[token.type];
+                return prefix.Parse(this, token);
+            }
         }
 
         private LexerToken Consume()
         {
-            if(!AtEnd())  return _tokens[_currentPosition];
+            if(!AtEnd())  return _tokens[_currentPosition++];
             throw new ArgumentOutOfRangeException("Reached end of tokens");
         }
 
@@ -61,7 +66,7 @@ namespace PrattParsing.Parser
 
         private bool AtEnd()
         {
-            if (_nextPosition > _tokens.Count) return true;
+            if (_currentPosition >= _tokens.Count) return true;
             return false;
         }
 
