@@ -10,6 +10,15 @@ namespace PrattParsing.Parser
 
         List<Expression> _Ast = new List<Expression>();
 
+        private Dictionary<LexerTokenType, PrefixParselet> _prefixParselets = new()
+        {
+            { LITERAL, new NameParselet() },
+            { PLUS, new PrefixOperatorParselet() },
+            { MINUS, new PrefixOperatorParselet() },
+            { BANG, new PrefixOperatorParselet() },
+            { TILDE, new PrefixOperatorParselet() },
+        };
+
         public PrattParser(PrattLexer l)
         {
             _tokens = l.GetTokens().ToList();
@@ -29,14 +38,16 @@ namespace PrattParsing.Parser
 
         public Expression ParseExpression()
         {
-            var token = _tokens[_currentPosition];
-            var _astToken = token.type switch
-            {
-                LITERAL => new NameExpression(token.literal),
-                _ => throw new ArgumentOutOfRangeException($"Cannot find ast for token {token.type}")
-            };
-            MoveNextToken();
-            return _astToken;
+            LexerToken token = this.Consume();
+
+            var prefix = this._prefixParselets[token.type];
+            return prefix.Parse(this, token);
+        }
+
+        private LexerToken Consume()
+        {
+            if(!AtEnd())  return _tokens[_currentPosition];
+            throw new ArgumentOutOfRangeException("Reached end of tokens");
         }
 
         private void MoveNextToken()
@@ -50,7 +61,7 @@ namespace PrattParsing.Parser
 
         private bool AtEnd()
         {
-            if (_nextPosition >= _tokens.Count) return true;
+            if (_nextPosition > _tokens.Count) return true;
             return false;
         }
 

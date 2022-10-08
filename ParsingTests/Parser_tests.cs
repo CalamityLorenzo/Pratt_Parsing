@@ -1,11 +1,5 @@
-﻿using PrattParsing;
-using PrattParsing.Lexer;
+﻿using PrattParsing.Lexer;
 using PrattParsing.Parser;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ParsingTests
 {
@@ -20,7 +14,7 @@ namespace ParsingTests
         [Test(Description = "Does the Parse reach the end.")]
         public void ParseTillEnd()
         {
-            var input = "5 + 5";
+            var input = "Larry Harry";
             var l = new PrattLexer(input);
 
             PrattParser p = new(l);
