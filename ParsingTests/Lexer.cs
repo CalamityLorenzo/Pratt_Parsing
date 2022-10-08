@@ -1,6 +1,7 @@
 using PrattParsing;
+using PrattParsing.Lexer;
 using System.Reflection;
-using static PrattParsing.LexerTokenType;
+using static PrattParsing.Lexer.LexerTokenType;
 
 namespace ParsingTests
 {

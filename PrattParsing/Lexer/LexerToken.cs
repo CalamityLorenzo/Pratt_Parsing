@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrattParsing
+namespace PrattParsing.Lexer
 {
-    public record LexerToken (LexerTokenType type, string literal);
+    public record LexerToken(LexerTokenType type, string literal);
 }

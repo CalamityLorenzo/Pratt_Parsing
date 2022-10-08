@@ -1,4 +1,4 @@
-﻿namespace PrattParsing
+﻿namespace PrattParsing.Lexer
 {
     public enum LexerTokenType
     {
