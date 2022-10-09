@@ -1,6 +1,6 @@
 ﻿namespace PrattParsing.Parser
 {
-    internal record ConditionalExpression : Expression
+    public record ConditionalExpression : Expression
     {
         private readonly Expression condition;
         private readonly Expression thenArm;

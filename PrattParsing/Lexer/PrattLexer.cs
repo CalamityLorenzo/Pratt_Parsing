@@ -17,7 +17,7 @@ namespace PrattParsing.Lexer
         {
             currentPosition = 0;
             NextPosition = 1;
-            rawInput = input!;
+            rawInput = input! + '\0';
         }
 
         public void MoveNextPosition()

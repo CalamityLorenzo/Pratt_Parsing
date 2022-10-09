@@ -2,5 +2,5 @@
 
 namespace PrattParsing.Parser
 {
-    internal record PrefixExpression(LexerTokenType type, Expression operand) : Expression;
+    public record PrefixExpression(LexerTokenType type, Expression operand) : Expression;
 }

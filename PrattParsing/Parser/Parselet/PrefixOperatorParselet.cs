@@ -1,6 +1,6 @@
 ﻿using PrattParsing.Lexer;
 
-namespace PrattParsing.Parser
+namespace PrattParsing.Parser.Parselet
 {
     internal record PrefixOperatorParselet : PrefixParselet
     {
@@ -8,7 +8,7 @@ namespace PrattParsing.Parser
         {
             // the sound of the machinery moving one step along
             Expression operand = parser.ParseExpression();
-            return new PrefixExpression(token.type, operand);
+            return new PrefixExpression(token.Type, operand);
         }
     }
 }
