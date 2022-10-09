@@ -19,7 +19,7 @@ namespace ParsingTests
             var input = "5 + 5";
             var l = new PrattLexer(input);
             IEnumerable<LexerToken> lTokens = l.GetTokens();
-            Assert.IsTrue(lTokens.Count() == 3);
+            Assert.IsTrue(lTokens.Count() == 4);
         }
 
         [Test(Description = "Ignores the rubbish space")]
@@ -29,7 +29,7 @@ namespace ParsingTests
             var l = new PrattLexer(input);
 
             IEnumerable<LexerToken> lTokens = l.GetTokens();
-            Assert.IsTrue(lTokens.Count() == 4);
+            Assert.IsTrue(lTokens.Count() == 5);
         }
 
         [Test(Description = "Ignores the rubbish space")]
@@ -49,6 +49,7 @@ namespace ParsingTests
                 new (LexerTokenType.INT, "10"),
                 new (LexerTokenType.RIGHT_PARENS, ")"),
                 new (LexerTokenType.SEMI_COLON, ";"),
+                new(EOF, "\0")
             };
 
             Assert.True(result.SequenceEqual(lt));
@@ -75,6 +76,7 @@ namespace ParsingTests
                 new (LexerTokenType.INT, "10"),
                 new (LexerTokenType.RIGHT_PARENS, ")"),
                 new (LexerTokenType.SEMI_COLON, ";"),
+                new(EOF, "\0")
             };
 
             Assert.True(lt.SequenceEqual(result));
@@ -94,7 +96,8 @@ namespace ParsingTests
                 new(INT, "0"),
                 new(EOF, "\0"),
                 new(RIGHT_PARENS, ")"),
-                new(SEMI_COLON, ";")
+                new(SEMI_COLON, ";"),
+                new(EOF, "\0")
             };
             Assert.True(lt.SequenceEqual(result));
         }
@@ -111,6 +114,7 @@ namespace ParsingTests
                 new(LITERAL, "This"),
                 new(LITERAL, "is"),
                 new(LITERAL, "Different"),
+                new(EOF, "\0")
             };
             Assert.True(lt.SequenceEqual(result));
         }

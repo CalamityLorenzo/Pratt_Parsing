@@ -22,28 +22,11 @@ namespace ParsingTests
             Assert.IsTrue(result.Count>-1);
         }
 
-        [Test(Description = "Just seeing what happens!.")]
-        public void ParseThis()
-        {
-            var input = "5+5";
-            var l = new PrattLexer(input);
-
-            PrattParser p = new(l);
-            var result = p.Parse();
-
-            var list = new List<Expression>
-            {
-                new NumberExpression("5", 5),
-                new PrefixExpression(LexerTokenType.PLUS, new NumberExpression("5", 5))
-            };
-            Assert.IsTrue(result.SequenceEqual(list));
-        }
-
         [Test(Description = "Only prefix parsing available")]
         public void OnlyPrefix()
         {
             // We want two expressions, both prefix.
-            var input = "-5+5";
+            var input = "-5;+5";
             var l = new PrattLexer(input);
 
             PrattParser p = new(l);
@@ -62,7 +45,7 @@ namespace ParsingTests
         public void BinaryOperatorParselet()
         {
             // We want two expressions, both prefix.
-            var input = "5+5";
+            var input = "5+7";
             var l = new PrattLexer(input);
 
             PrattParser p = new(l);
@@ -70,7 +53,10 @@ namespace ParsingTests
 
             var list = new List<Expression>
             {
-                new OperatorExpression(new NumberExpression("5", 5), LexerTokenType.PLUS, new NumberExpression("5", 5)),
+                new OperatorExpression(
+                    new NumberExpression("5", 5), 
+                        LexerTokenType.PLUS, 
+                new NumberExpression("7", 7)),
             };
             Assert.IsTrue(result.SequenceEqual(list));
         }

@@ -51,13 +51,14 @@ namespace PrattParsing.Parser
 
             Expression left = prefix.Parse(this, token);
 
-            // token = lookAhead(0);
+            // EffectivePeek
+            token = LookAhead(0);
             InfixParselet? infix = GetInfixParslet(token.Type);
 
             // Expression completed no fix required.
             if (infix == null) return left;
-            // Move next!
-            //Consume();
+            // Move next so we can get the right side of the infix expression
+            Consume();
             return infix.Parse(this, left, token);
         }
 
@@ -73,9 +74,12 @@ namespace PrattParsing.Parser
         /// </summary>
         /// <param name="distance"></param>
         /// <returns></returns>
-        private LexerToken lookAhead(int distance)
+        private LexerToken LookAhead(int distance)
         {
-            return _tokens[_currentPosition + distance];
+            var peekToken = _currentPosition + distance;
+            if(peekToken<=_tokens.Count)
+                return _tokens[_currentPosition + distance];
+            return new LexerToken(EOF, null);
         }
 
         private LexerToken Consume()
