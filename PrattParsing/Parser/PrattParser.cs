@@ -77,7 +77,7 @@ namespace PrattParsing.Parser
         private LexerToken LookAhead(int distance)
         {
             var peekToken = _currentPosition + distance;
-            if(peekToken<=_tokens.Count)
+            if (peekToken <= _tokens.Count)
                 return _tokens[_currentPosition + distance];
             return new LexerToken(EOF, null);
         }
@@ -106,6 +106,21 @@ namespace PrattParsing.Parser
         private LexerToken Previous()
         {
             return _tokens[_currentPosition - 1];
+        }
+
+        /// <summary>
+        /// MAtch the next token, and expect it to be the tagged token
+        /// if not throw like a screaming toddler
+        /// </summary>
+        /// <param name="cOLON"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        internal Token Consume(LexerTokenType expectedToken)
+        {
+            var token = this.LookAhead(0);
+            if (token.Type != expectedToken)
+                throw new ParserException($"Failed to consume : {expectedToken} got= {token.Type}");
+            else
+                return token;
         }
     }
 }
