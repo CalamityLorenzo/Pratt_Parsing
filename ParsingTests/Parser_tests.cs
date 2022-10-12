@@ -60,5 +60,26 @@ namespace ParsingTests
             };
             Assert.IsTrue(result.SequenceEqual(list));
         }
+
+        [Test(Description = "Binary Operator")]
+        public void ConditionalOperator()
+        {
+            // We want two expressions, both prefix.
+            var input = "8+2?3/1:8/2;";
+            input = "a + (b ? c! : -d)";
+            var l = new PrattLexer(input);
+
+            PrattParser p = new(l);
+            var result = p.Parse();
+
+            var list = new List<Expression>
+            {
+                new OperatorExpression(
+                    new NumberExpression("5", 5),
+                        LexerTokenType.PLUS,
+                new NumberExpression("7", 7)),
+            };
+            Assert.IsTrue(result.SequenceEqual(list));
+        }
     }
 }

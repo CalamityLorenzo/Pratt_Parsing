@@ -2,5 +2,5 @@
 
 namespace PrattParsing.Parser
 {
-    internal record PostfixExpression(Expression Left, LexerTokenType Type) : Expression
+    internal record PostfixExpression(Expression Left, LexerTokenType Type) : Expression { }
 }

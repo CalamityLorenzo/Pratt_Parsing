@@ -8,5 +8,6 @@ namespace PrattParsing.Parser.Parselet
     interface InfixParselet
     {
         Expression Parse(PrattParser parser, Expression left, LexerToken token);
+        int GetPrecedence();
     }
 }

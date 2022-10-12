@@ -2,8 +2,9 @@
 using PrattParsing.Parser.Parselet;
 using System.Net;
 using static PrattParsing.Lexer.LexerTokenType;
+using static PrattParsing.Parser.Parselet.Precedence;
+
 namespace PrattParsing.Parser
-{
     public class PrattParser
     {
         private List<LexerToken> _tokens;
@@ -20,13 +21,17 @@ namespace PrattParsing.Parser
             { MINUS, new PrefixOperatorParselet() },
             { BANG, new PrefixOperatorParselet() },
             { TILDE, new PrefixOperatorParselet() },
+            {LEFT_PARENS, new GroupParselet() }
         };
         private Dictionary<LexerTokenType, InfixParselet> _infixParselets = new()
         {
-            { PLUS, new BinaryOperatorParselet() },
-            { MINUS, new BinaryOperatorParselet() },
-            { BANG, new BinaryOperatorParselet() },
-            { TILDE, new BinaryOperatorParselet() },
+            { PLUS, new BinaryOperatorParselet((int)PREFIX, false) },
+            { MINUS, new BinaryOperatorParselet((int)PREFIX) },
+            { CARET, new BinaryOperatorParselet((int)EXPONENT) },
+            { BANG, new PostfixOperatorParselet((int)POSTFIX)  },
+            { TILDE, new BinaryOperatorParselet((int)PREFIX) },
+            { QUESTION_MARK, new ConditionalParselet((int)CONDITIONAL) }
+
         };
 
         public PrattParser(PrattLexer l)
@@ -38,12 +43,12 @@ namespace PrattParsing.Parser
         {
             while (!AtEnd())
             {
-                this._Ast.Add(ParseExpression());
+                this._Ast.Add(ParseExpression(0));
             }
             return _Ast;
         }
-
-        public Expression ParseExpression()
+        public Expression ParseExpression() => this.ParseExpression(0);
+        public Expression ParseExpression(int precedence)
         {
             LexerToken token = this.Consume();
             if (!this._prefixParselets.ContainsKey(token.Type)) throw new ParserException($"Cannot find token type in Parser: {token.Type}");
@@ -51,15 +56,32 @@ namespace PrattParsing.Parser
 
             Expression left = prefix.Parse(this, token);
 
-            // EffectivePeek
-            token = LookAhead(0);
-            InfixParselet? infix = GetInfixParslet(token.Type);
+            while (precedence < GetPrecedence())
+            {
+                // EffectivePeek
+                token = Consume();
 
-            // Expression completed no fix required.
-            if (infix == null) return left;
-            // Move next so we can get the right side of the infix expression
-            Consume();
-            return infix.Parse(this, left, token);
+                InfixParselet? infix = GetInfixParslet(token.Type);
+
+                // Expression completed no fix required.
+                //if (infix == null) return left;
+                // Move next so we can get the right side of the infix expression
+                //Consume();
+                left = infix.Parse(this, left, token); ;
+                //return infix.Parse(this, left, token);
+            }
+
+            return left;
+        }
+
+        private int GetPrecedence()
+        {
+            var nxt = LookAhead(0).Type;
+            var infixExp = _infixParselets[nxt];
+            InfixParselet parser = infixExp;
+            if (parser != null) return parser.GetPrecedence();
+
+            return 0;
         }
 
         private InfixParselet? GetInfixParslet(LexerTokenType type)
@@ -114,13 +136,13 @@ namespace PrattParsing.Parser
         /// </summary>
         /// <param name="cOLON"></param>
         /// <exception cref="NotImplementedException"></exception>
-        internal Token Consume(LexerTokenType expectedToken)
+        internal LexerToken Consume(LexerTokenType expectedToken)
         {
             var token = this.LookAhead(0);
             if (token.Type != expectedToken)
                 throw new ParserException($"Failed to consume : {expectedToken} got= {token.Type}");
             else
-                return token;
+                return Consume();
         }
     }
 }
